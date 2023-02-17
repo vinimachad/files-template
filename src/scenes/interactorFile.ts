@@ -1,8 +1,10 @@
 interface IInteractor {
   sceneName: string;
+  sceneNameWithSnakeCase: string
 }
 
-export default ({ sceneName }: IInteractor) => `
+export default ({ sceneName, sceneNameWithSnakeCase }: IInteractor) => `
+import '${sceneNameWithSnakeCase}_presenter.dart';
 
 abstract class ${sceneName}BusinessLogic {
   void loadSomething();

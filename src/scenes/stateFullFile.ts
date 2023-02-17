@@ -1,10 +1,14 @@
 interface IView {
   sceneName: string;
+  sceneNameWithSnakeCase: string
 }
 
-export default ({ sceneName }: IView) => `
+export default ({ sceneName, sceneNameWithSnakeCase }: IView) => `
 import 'package:flutter/material.dart';
 import 'package:flutter/src/widgets/placeholder.dart';
+
+import '${sceneNameWithSnakeCase}_interactor.dart';
+import '${sceneNameWithSnakeCase}_presenter.dart';
 
 abstract class ${sceneName}DisplayLogic {
   void displaySomething();
@@ -19,14 +23,12 @@ class ${sceneName}View extends StatefulWidget {
 
 class _${sceneName}ViewState extends State<${sceneName}View> implements ${sceneName}DisplayLogic {
   ${sceneName}BusinessLogic? interactor;
-  ${sceneName}RoutingLogic? router;
 
   @override
   void initState() {
     var view = this;
     var interactor = ${sceneName}Interactor();
     var presenter = ${sceneName}Presenter();
-    var router = ${sceneName}Router();
     presenter.view = view;
     interactor.presenter = presenter;
     this.interactor = interactor;
@@ -35,7 +37,7 @@ class _${sceneName}ViewState extends State<${sceneName}View> implements ${sceneN
 
   @override
   Widget build(BuildContext context) {
-    return const Placeholder()
+    return const Placeholder();
   }
 
   @override

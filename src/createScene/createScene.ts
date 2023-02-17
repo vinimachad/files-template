@@ -29,15 +29,15 @@ export default ({ path, sceneName, isStateFull }: ICreateScene) => {
     }
 
     function createStateFullScene() {
-        createFile(absolutePath.concat('/', `${sceneNameWithSnakeCase}_view.${fileExtension}`), stateFullFile({sceneName}));
-        createFile(absolutePath.concat('/', `${sceneNameWithSnakeCase}_presenter.${fileExtension}`), presenterFile({sceneName}));
-        createFile(absolutePath.concat('/', `${sceneNameWithSnakeCase}_interactor.${fileExtension}`), interactorFile({sceneName}));
+        createFile(absolutePath.concat('/', `${sceneNameWithSnakeCase}_view.${fileExtension}`), stateFullFile({sceneName, sceneNameWithSnakeCase}));
+        createFile(absolutePath.concat('/', `${sceneNameWithSnakeCase}_presenter.${fileExtension}`), presenterFile({sceneName, sceneNameWithSnakeCase}));
+        createFile(absolutePath.concat('/', `${sceneNameWithSnakeCase}_interactor.${fileExtension}`), interactorFile({sceneName, sceneNameWithSnakeCase}));
     };
     
     function createStateLessScene() {
-        createFile(absolutePath.concat('/', `${sceneNameWithSnakeCase}_view.${fileExtension}`), statlessFile({sceneName}));
-        createFile(absolutePath.concat('/', `${sceneNameWithSnakeCase}_presenter.${fileExtension}`), presenterFile({sceneName}));
-        createFile(absolutePath.concat('/', `${sceneNameWithSnakeCase}_interactor.${fileExtension}`), interactorFile({sceneName}));
+        createFile(absolutePath.concat('/', `${sceneNameWithSnakeCase}_view.${fileExtension}`), statlessFile({sceneName, sceneNameWithSnakeCase}));
+        createFile(absolutePath.concat('/', `${sceneNameWithSnakeCase}_presenter.${fileExtension}`), presenterFile({sceneName, sceneNameWithSnakeCase}));
+        createFile(absolutePath.concat('/', `${sceneNameWithSnakeCase}_interactor.${fileExtension}`), interactorFile({sceneName, sceneNameWithSnakeCase}));
     };
 };
 

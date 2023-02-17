@@ -1,10 +1,14 @@
 interface IView {
   sceneName: string;
+  sceneNameWithSnakeCase: string
 }
 
-export default ({ sceneName }: IView) => `
+export default ({ sceneName, sceneNameWithSnakeCase }: IView) => `
 import 'package:flutter/src/widgets/framework.dart';
 import 'package:flutter/src/widgets/placeholder.dart';
+
+import '${sceneNameWithSnakeCase}_interactor.dart';
+import '${sceneNameWithSnakeCase}_presenter.dart';
 
 abstract class ${sceneName}DisplayLogic {
   void displaySomething();

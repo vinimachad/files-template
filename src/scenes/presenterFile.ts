@@ -1,8 +1,11 @@
 interface IPresent {
   sceneName: string;
+  sceneNameWithSnakeCase: string
 }
 
-export default ({ sceneName }: IPresent) => `
+export default ({ sceneName, sceneNameWithSnakeCase }: IPresent) => `
+import '${sceneNameWithSnakeCase}_view.dart';
+
 abstract class ${sceneName}PresentingLogic {
   void presentSomething();
 }
