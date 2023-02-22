@@ -1,56 +1,70 @@
 import * as fs from 'fs';
 import * as Mustache from 'mustache';
 import * as vscode from 'vscode';
+import { ITemplate } from '../extension';
 
 interface ICreateScene {
-    sceneName: string 
-    selectedOption: string
-    basePath: string
+    sceneName: string
+    selectedOption: ITemplate
+    templatePath: string
     destinationPath: string
 }
 
-export default ({ sceneName, selectedOption, basePath, destinationPath }: ICreateScene) => {
+export default async ({ sceneName, selectedOption, templatePath, destinationPath }: ICreateScene) => {
+    var values = new Object();
 
-    let optionPath = basePath.concat('/', selectedOption);
+    for (let i = 0; i < selectedOption.vars.length; i++) {
+        let value = await vscode.window.showInputBox({
+            placeHolder: `Escreva o valor da variável ${selectedOption.vars[i]}`,
+        });
+
+        if (!value) {
+            return;
+        }
+
+        values = {...values, [selectedOption.vars[i]]: value};
+    }
+    
     let destinationPathSceneName = destinationPath.concat('/', sceneName);
     fs.mkdirSync(destinationPathSceneName);
-    fs.cpSync(optionPath, destinationPathSceneName, { recursive: true });
+    fs.cpSync(templatePath, destinationPathSceneName, { recursive: true });
 
-    validateIfHasFoldersIn(destinationPathSceneName, sceneName);
+    validateIfHasFoldersIn(destinationPathSceneName, sceneName, values);
 };
 
-const fillVariablesInFilesAndFolders = (path: string, name: string) => {
-	let items = fs.readdirSync(path);
-	items.forEach(item => {
-		let formated = Mustache.render(item, { name });
-		fs.renameSync(path.concat('/', item), path.concat('/', formated));
-	});
+const fillVariablesInFilesAndFolders = (path: string, name: string, selectedOptions: any) => {
+    let items = fs.readdirSync(path);
+    items.forEach(item => {
+        let formated = Mustache.render(item, { name, ...selectedOptions });
+        fs.renameSync(path.concat('/', item), path.concat('/', formated));
+    });
 
-	let formatedItems = fs.readdirSync(path);
+    let formatedItems = fs.readdirSync(path);
 
-	formatedItems.forEach(item => {
-		if (item.includes('.')) {
-			let readed = fs.readFileSync(path.concat('/', item), { encoding: 'utf-8' });
-			let filled = Mustache.render(readed, { name });
-			fs.writeFileSync(path.concat('/', item), filled);
-		}
-	});
+    formatedItems.forEach(item => {
+        if (item.includes('.')) {
+            let readed = fs.readFileSync(path.concat('/', item), { encoding: 'utf-8' });
+            let filled = Mustache.render(readed, { name, ...selectedOptions });
+            fs.writeFileSync(path.concat('/', item), filled);
+        }
+    });
 };
 
-const validateIfHasFoldersIn = (basePath: string, sceneName: string) => {
-	let options = fs.readdirSync(basePath);
-	let folders = options.filter(option => {
-		if (!option.includes('.')) {
-			return option;
-		}
-	});
-	let folderPaths = folders.map(folder => {
-		return basePath.concat('/', folder);
-	});
-    fillVariablesInFilesAndFolders(basePath, sceneName);
-	
+const validateIfHasFoldersIn = (basePath: string, sceneName: string, selectedOption: any) => {
+    let options = fs.readdirSync(basePath);
+    let folders = options.filter(option => {
+        if (!option.includes('.')) {
+            return option;
+        }
+    });
+
+    let folderPaths = folders.map(folder => {
+        return basePath.concat('/', folder);
+    });
+    fillVariablesInFilesAndFolders(basePath, sceneName, selectedOption);
+
     folderPaths.forEach(folder => {
-        validateIfHasFoldersIn(folder, sceneName);
+        validateIfHasFoldersIn(folder, sceneName, selectedOption);
     });
 };
 

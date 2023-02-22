@@ -1,37 +1,29 @@
 import * as fs from 'fs';
+import * as yaml from 'js-yaml';
 import * as vscode from 'vscode';
 import createScene from './createScene/createScene';
 
-const handleCreateScene = async (args: any, isStateFull: boolean) => {
-	const sceneName = await vscode.window.showInputBox({
-		prompt: `Enter the scene name:`,
-		ignoreFocusOut: true,
-		valueSelection: [-1, -1],
-	});
+export interface IConfiFile {
+	kinds: string[];
+	templates: ITemplate[];
+}
 
-	if (!sceneName) {
-		return;
-	}
+export interface ITemplate {
+	kind: string;
+	vars: string[];
+}
 
-	if (args) {
-		const path = String(args.fsPath);
-		// createScene({ sceneName, path, isStateFull });
-	}
-};
+const handleTemplatePath = async (templatePath: string, currentPath: string, config: IConfiFile) => {
 
-const handleTemplatePath = async (templatePath: string, currentPath: string) => {
-	let getOptions = fs.readdirSync(templatePath);
-	let templateFolderExists = getOptions.find((options) => options === "templates");
-
-	if (templateFolderExists) {
-		let pathOfTemplates = templatePath.concat('/', 'templates');
-		let options = fs.readdirSync(pathOfTemplates);
+		let options = config.kinds;
 		let selectedOption = await vscode.window.showQuickPick(options, {
 			title: "Templates",
 			placeHolder: "Selecione o template desejado."
 		});
 
-		if (!selectedOption) {
+		let option = config.templates.filter(template => template.kind === selectedOption)[0];
+
+		if (!selectedOption && !option) {
 			return;
 		}
 
@@ -45,23 +37,23 @@ const handleTemplatePath = async (templatePath: string, currentPath: string) => 
 		}
 		createScene({
 			sceneName,
-			selectedOption,
-			basePath: pathOfTemplates,
+			selectedOption: option,
+			templatePath,
 			destinationPath: currentPath
 		});
-	} else {
-		showDialog('Crie uma pasta `templates` e passe a localizção do diretorio corretamente, nas configurações da extensão');
-	}
 };
 
 export function activate(context: vscode.ExtensionContext) {
 	let disposable = [
 		vscode.commands.registerCommand('filestemplate.createFileTemplates', async args => {
-			let templatePath = "/Users/vinimachad/.vscode/extensions/undefined.filestemplate-0.0.1";
-			handleTemplatePath(templatePath, args.fsPath);
-		}),
-		vscode.commands.registerCommand('filestemplate.createVIPSceneStateLess', async args => {
-			handleCreateScene(args, false);
+			let rootFolders = vscode.workspace.workspaceFolders;
+			if (!rootFolders) {
+				return;
+			}
+			let rootPath = rootFolders[0].uri.fsPath;
+			let raw = fs.readFileSync(rootPath.concat('/', 'templates.yaml')).toString();
+			let data = yaml.load(raw) as IConfiFile;
+			handleTemplatePath(rootPath.concat('/templates'), args.fsPath, data);
 		})
 	];
 

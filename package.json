@@ -44,10 +44,6 @@
       "properties": {
         "filestemplate.fileExtension": {
           "type": "string",
-          "enum": [
-            "dart"
-          ],
-          "default": "dart",
           "markdownDescription": "Default file extension for Flutter files."
         }
       }
@@ -63,6 +59,7 @@
   },
   "devDependencies": {
     "@types/glob": "^8.0.1",
+    "@types/js-yaml": "^4.0.5",
     "@types/mocha": "^10.0.1",
     "@types/mustache": "^4.2.2",
     "@types/node": "16.x",
@@ -76,6 +73,7 @@
     "typescript": "^4.9.4"
   },
   "dependencies": {
+    "js-yaml": "^4.1.0",
     "mustache": "^4.2.0"
   }
 }
