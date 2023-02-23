@@ -1,6 +1,7 @@
 import * as fs from 'fs';
 import * as Mustache from 'mustache';
 import * as vscode from 'vscode';
+import mapDefaultVariables from '../defaultVariables/mapDefaultVariables';
 import { ITemplate } from '../extension';
 
 interface ICreateScene {
@@ -11,35 +12,41 @@ interface ICreateScene {
 }
 
 export default async ({ sceneName, selectedOption, templatePath, destinationPath }: ICreateScene) => {
-    var filledVars = new Object();
+    var filledVars = {
+        name: sceneName,
+    };
 
-    showMultInputs();
-    
+    await showMultInputs();
+    filledVars = mapDefaultVariables(filledVars);
+
     let destinationPathSceneName = destinationPath.concat('/', sceneName);
     fs.mkdirSync(destinationPathSceneName);
-    fs.cpSync(templatePath, destinationPathSceneName, { recursive: true });
+    fs.cpSync(templatePath.concat('/', selectedOption.kind), destinationPathSceneName, { recursive: true });
 
-    validateIfHasFoldersIn(destinationPathSceneName, sceneName, filledVars);
+    validateIfHasFoldersIn(destinationPathSceneName, filledVars);
 
     async function showMultInputs() {
-        for (let i = 0; i < selectedOption.vars.length; i++) {
-            let value = await vscode.window.showInputBox({
-                placeHolder: `Escreva o valor da variável ${selectedOption.vars[i]}`,
-            });
-    
-            if (!value) {
-                return;
+        if (selectedOption.vars) {
+            for (let i = 0; i < selectedOption.vars.length; i++) {
+                let value = await vscode.window.showInputBox({
+                    title: selectedOption.vars[i],
+                    placeHolder: `Escreva o valor da variável ${selectedOption.vars[i]}`,
+                });
+
+                if (!value) {
+                    return;
+                }
+
+                filledVars = { ...filledVars, [selectedOption.vars[i]]: value };
             }
-    
-            filledVars = {...filledVars, [selectedOption.vars[i]]: value};
         }
     }
 };
 
-const fillVariablesInFilesAndFolders = (path: string, name: string, selectedOptions: any) => {
+const fillVariablesInFilesAndFolders = (path: string, filledVars: any) => {
     let items = fs.readdirSync(path);
     items.forEach(item => {
-        let formated = Mustache.render(item, { name, ...selectedOptions });
+        let formated = Mustache.render(item, filledVars);
         fs.renameSync(path.concat('/', item), path.concat('/', formated));
     });
 
@@ -48,13 +55,13 @@ const fillVariablesInFilesAndFolders = (path: string, name: string, selectedOpti
     formatedItems.forEach(item => {
         if (item.includes('.')) {
             let readed = fs.readFileSync(path.concat('/', item), { encoding: 'utf-8' });
-            let filled = Mustache.render(readed, { name, ...selectedOptions });
+            let filled = Mustache.render(readed, filledVars);
             fs.writeFileSync(path.concat('/', item), filled);
         }
     });
 };
 
-const validateIfHasFoldersIn = (basePath: string, sceneName: string, selectedOption: any) => {
+const validateIfHasFoldersIn = (basePath: string, filledVars: any) => {
     let options = fs.readdirSync(basePath);
     let folders = options.filter(option => {
         if (!option.includes('.')) {
@@ -65,9 +72,9 @@ const validateIfHasFoldersIn = (basePath: string, sceneName: string, selectedOpt
     let folderPaths = folders.map(folder => {
         return basePath.concat('/', folder);
     });
-    fillVariablesInFilesAndFolders(basePath, sceneName, selectedOption);
+    fillVariablesInFilesAndFolders(basePath, filledVars);
 
     folderPaths.forEach(folder => {
-        validateIfHasFoldersIn(folder, sceneName, selectedOption);
+        validateIfHasFoldersIn(folder, filledVars);
     });
 };
