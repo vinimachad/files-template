@@ -11,25 +11,29 @@ interface ICreateScene {
 }
 
 export default async ({ sceneName, selectedOption, templatePath, destinationPath }: ICreateScene) => {
-    var values = new Object();
+    var filledVars = new Object();
 
-    for (let i = 0; i < selectedOption.vars.length; i++) {
-        let value = await vscode.window.showInputBox({
-            placeHolder: `Escreva o valor da variável ${selectedOption.vars[i]}`,
-        });
-
-        if (!value) {
-            return;
-        }
-
-        values = {...values, [selectedOption.vars[i]]: value};
-    }
+    showMultInputs();
     
     let destinationPathSceneName = destinationPath.concat('/', sceneName);
     fs.mkdirSync(destinationPathSceneName);
     fs.cpSync(templatePath, destinationPathSceneName, { recursive: true });
 
-    validateIfHasFoldersIn(destinationPathSceneName, sceneName, values);
+    validateIfHasFoldersIn(destinationPathSceneName, sceneName, filledVars);
+
+    async function showMultInputs() {
+        for (let i = 0; i < selectedOption.vars.length; i++) {
+            let value = await vscode.window.showInputBox({
+                placeHolder: `Escreva o valor da variável ${selectedOption.vars[i]}`,
+            });
+    
+            if (!value) {
+                return;
+            }
+    
+            filledVars = {...filledVars, [selectedOption.vars[i]]: value};
+        }
+    }
 };
 
 const fillVariablesInFilesAndFolders = (path: string, name: string, selectedOptions: any) => {
@@ -67,48 +71,3 @@ const validateIfHasFoldersIn = (basePath: string, sceneName: string, selectedOpt
         validateIfHasFoldersIn(folder, sceneName, selectedOption);
     });
 };
-
-const createFile = (filePath: string, content: string) => {
-    fs.writeFile(filePath, content, err => {
-        if (err) {
-            vscode.window.showInformationMessage('Erro: ', err.message);
-        }
-    });
-};
-
-const createDir = (path: string, sceneName: string) => {
-    try {
-        fs.mkdirSync(path);
-    } catch (error) {
-        vscode.window.showInformationMessage('Já existe uma pasta com esse nome');
-    }
-};
-
-function asdaf() {
-    // const config = vscode.workspace.getConfiguration('filestemplate');
-    // const absolutePath = path.concat('/', sceneName);
-
-    // const fileExtension = config.get('fileExtension') as string;
-
-    // let sceneNameWithSnakeCase = toSnakeCase(sceneName);
-
-    // createDir(absolutePath, sceneName);
-
-    // if (isStateFull) {
-    //     createStateFullScene();
-    // } else {
-    //     createStateLessScene();
-    // }
-
-    // function createStateFullScene() {
-    //     createFile(absolutePath.concat('/', `${sceneNameWithSnakeCase}_view.${fileExtension}`), stateFullFile({sceneName, sceneNameWithSnakeCase}));
-    //     createFile(absolutePath.concat('/', `${sceneNameWithSnakeCase}_presenter.${fileExtension}`), presenterFile({sceneName, sceneNameWithSnakeCase}));
-    //     createFile(absolutePath.concat('/', `${sceneNameWithSnakeCase}_interactor.${fileExtension}`), interactorFile({sceneName, sceneNameWithSnakeCase}));
-    // };
-
-    // function createStateLessScene() {
-    //     createFile(absolutePath.concat('/', `${sceneNameWithSnakeCase}_view.${fileExtension}`), statlessFile({sceneName, sceneNameWithSnakeCase}));
-    //     createFile(absolutePath.concat('/', `${sceneNameWithSnakeCase}_presenter.${fileExtension}`), presenterFile({sceneName, sceneNameWithSnakeCase}));
-    //     createFile(absolutePath.concat('/', `${sceneNameWithSnakeCase}_interactor.${fileExtension}`), interactorFile({sceneName, sceneNameWithSnakeCase}));
-    // };
-}
