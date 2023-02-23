@@ -11,7 +11,7 @@
   ],
   "activationEvents": [
     "onCommand:filestemplate.createFileTemplates",
-    "onCommand:filestemplate.createVIPSceneStateLess"
+    "onCommand:filestemplate.setupFileTemplates"
   ],
   "main": "./out/extension.js",
   "contributes": {
@@ -21,8 +21,8 @@
         "title": "🟢 Create files from template"
       },
       {
-        "command": "filestemplate.createVIPSceneStateLess",
-        "title": "🔵 Create flutter scene with state less"
+        "command": "filestemplate.setupFileTemplates",
+        "title": "🔴 Setup files templates in project"
       }
     ],
     "menus": {
@@ -33,20 +33,11 @@
           "when": "explorerResourceIsFolder"
         },
         {
-          "command": "filestemplate.createVIPSceneStateLess",
+          "command": "filestemplate.setupFileTemplates",
           "group": "0a_modification",
           "when": "explorerResourceIsFolder"
         }
       ]
-    },
-    "configuration": {
-      "title": "File template tools",
-      "properties": {
-        "filestemplate.fileExtension": {
-          "type": "string",
-          "markdownDescription": "Default file extension for Flutter files."
-        }
-      }
     }
   },
   "scripts": {

@@ -1,7 +1,9 @@
 import * as fs from 'fs';
 import * as yaml from 'js-yaml';
 import * as vscode from 'vscode';
-import createScene from './createScene/createScene';
+import createFileFromTemplate from './handlers/createFileFromTemplate';
+import setupFileTemplates from './handlers/setupFileTemplates';
+import getRootPath from './utils/getRootPath';
 
 export interface IConfiFile {
 	kinds: string[];
@@ -13,55 +15,26 @@ export interface ITemplate {
 	vars: string[];
 }
 
-const handleTemplatePath = async (templatePath: string, currentPath: string, config: IConfiFile) => {
-
-		let options = config.kinds;
-		let selectedOption = await vscode.window.showQuickPick(options, {
-			title: "Templates",
-			placeHolder: "Selecione o template desejado."
-		});
-
-		let option = config.templates.filter(template => template.kind === selectedOption)[0];
-
-		if (!selectedOption && !option) {
-			return;
-		}
-
-		let sceneName = await vscode.window.showInputBox({
-			title: "Nome da cena",
-			placeHolder: "Escreva o nome da sua cena",
-		});
-
-		if (!sceneName) {
-			return;
-		}
-		createScene({
-			sceneName,
-			selectedOption: option,
-			templatePath,
-			destinationPath: currentPath
-		});
-};
-
 export function activate(context: vscode.ExtensionContext) {
+
+	let rootPath = getRootPath();
+
 	let disposable = [
 		vscode.commands.registerCommand('filestemplate.createFileTemplates', async args => {
-			let rootFolders = vscode.workspace.workspaceFolders;
-			if (!rootFolders) {
-				return;
-			}
-			let rootPath = rootFolders[0].uri.fsPath;
-			let raw = fs.readFileSync(rootPath.concat('/', 'templates.yaml')).toString();
-			let data = yaml.load(raw) as IConfiFile;
-			handleTemplatePath(rootPath.concat('/templates'), args.fsPath, data);
+			createFileFromTemplate(rootPath.concat('/templates'), args.fsPath, loadYaml(rootPath));
+		}),
+		
+		vscode.commands.registerCommand('filestemplate.setupFileTemplates', async args => {
+			setupFileTemplates();
 		})
 	];
 
 	context.subscriptions.push(...disposable);
 }
 
-const showDialog = (text: string) => {
-	vscode.window.showInformationMessage(text);
-};
-
 export function deactivate() { }
+
+const loadYaml = (rootPath: string): IConfiFile => {
+	let raw = fs.readFileSync(rootPath.concat('/templates', '/config-templates.yaml')).toString();
+	return yaml.load(raw) as IConfiFile;
+};

@@ -1,0 +1,7 @@
+kinds: 
+  - TemplateExample
+
+templates: 
+  - kind: 'TemplateExample'
+    vars: 
+      - 'exampleVar'
