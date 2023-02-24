@@ -1,21 +1,16 @@
 import * as vscode from "vscode";
 import { IConfiFile, ITemplate } from "../extension";
+import { AppManager } from "../utils/AppManager";
 import createScene from "./createScene/createScene";
 
-export default async (templatePath: string, currentPath: string, config: IConfiFile) => {
-    
+export default async (config: IConfiFile) => {
+    const appManager = AppManager.shared;
     const templateOptions = buildTemplateOptions();
     const selectedOptionQuickPick = await getSelectedQuickPickOption();
     const selectedOption = config.templates[selectedOptionQuickPick] as unknown as ITemplate;
-    const sceneName = await getSceneNameInput();
+    await getSceneNameInput();
     
-    createScene({
-        sceneName,
-        selectedOption,
-        templatePath,
-        destinationPath: currentPath,
-        optionKind: selectedOptionQuickPick
-    });
+    createScene({selectedOption});
 
     async function getSceneNameInput(): Promise<string> {
         let sceneName = await vscode.window.showInputBox({
@@ -26,7 +21,7 @@ export default async (templatePath: string, currentPath: string, config: IConfiF
         if (!sceneName) {
             return '';
         }
-
+        appManager.setSceneName(sceneName);
         return sceneName;
     }
 
@@ -39,6 +34,8 @@ export default async (templatePath: string, currentPath: string, config: IConfiF
         if (!selectedOptionQuickPick) {
             return '';
         }
+
+        appManager.setSelectedOption(selectedOptionQuickPick);
 
         return selectedOptionQuickPick;
     }
