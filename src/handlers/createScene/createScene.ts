@@ -1,17 +1,18 @@
 import * as fs from 'fs';
 import * as Mustache from 'mustache';
 import * as vscode from 'vscode';
-import mapDefaultVariables from '../defaultVariables/mapDefaultVariables';
-import { ITemplate } from '../extension';
+import mapDefaultVariables from '../../defaultVariables/mapDefaultVariables';
+import { ITemplate } from '../../extension';
 
 interface ICreateScene {
     sceneName: string
+    optionKind: string
     selectedOption: ITemplate
     templatePath: string
     destinationPath: string
 }
 
-export default async ({ sceneName, selectedOption, templatePath, destinationPath }: ICreateScene) => {
+export default async ({ sceneName, selectedOption, templatePath, destinationPath, optionKind }: ICreateScene) => {
     var filledVars = {
         name: sceneName,
     };
@@ -21,7 +22,7 @@ export default async ({ sceneName, selectedOption, templatePath, destinationPath
 
     let destinationPathSceneName = destinationPath.concat('/', sceneName);
     fs.mkdirSync(destinationPathSceneName);
-    fs.cpSync(templatePath.concat('/', selectedOption.kind), destinationPathSceneName, { recursive: true });
+    fs.cpSync(templatePath.concat('/', optionKind), destinationPathSceneName, { recursive: true });
 
     validateIfHasFoldersIn(destinationPathSceneName, filledVars);
 

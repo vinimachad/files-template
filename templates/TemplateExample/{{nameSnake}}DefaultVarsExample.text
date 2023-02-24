@@ -1,4 +1,0 @@
--- Valor do primeiro campo que é chamado --
-{{name}}: sem formatação
-{{nameCamel}}: formatado com camelCase
-{{namePascal}}: formatado com pascal case

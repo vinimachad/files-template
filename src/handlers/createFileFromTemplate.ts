@@ -1,21 +1,23 @@
 import * as vscode from "vscode";
-import createScene from "../createScene/createScene";
-import { IConfiFile } from "../extension";
+import { IConfiFile, ITemplate } from "../extension";
+import createScene from "./createScene/createScene";
 
 export default async (templatePath: string, currentPath: string, config: IConfiFile) => {
-
-    let options = config.kinds;
-    let selectedOption = await vscode.window.showQuickPick(options, {
+    var templateOptions: string[] = [];
+    for (var key in config.templates) {
+        templateOptions.push(key);
+    }
+    
+    let selectedOptionQuickPick = await vscode.window.showQuickPick(templateOptions, {
         title: "Templates",
         placeHolder: "Selecione o template desejado."
     });
 
-    let option = config.templates.filter(template => template.kind === selectedOption)[0];
-
-    if (!selectedOption && !option) {
+    if (!selectedOptionQuickPick) {
         return;
     }
 
+    let selectedOption = config.templates[selectedOptionQuickPick] as unknown as ITemplate;
     let sceneName = await vscode.window.showInputBox({
         title: "Nome da cena",
         placeHolder: "Escreva o nome da sua cena",
@@ -26,8 +28,9 @@ export default async (templatePath: string, currentPath: string, config: IConfiF
     }
     createScene({
         sceneName,
-        selectedOption: option,
+        selectedOption,
         templatePath,
-        destinationPath: currentPath
+        destinationPath: currentPath,
+        optionKind: selectedOptionQuickPick
     });
 };

@@ -6,12 +6,10 @@ import createFileFromTemplate from './handlers/createFileFromTemplate';
 import setupFileTemplates from './handlers/setupFileTemplates';
 
 export interface IConfiFile {
-	kinds: string[];
-	templates: ITemplate[];
+	templates: {[x: string]: void};
 }
 
 export interface ITemplate {
-	kind: string;
 	vars: string[];
 }
 
