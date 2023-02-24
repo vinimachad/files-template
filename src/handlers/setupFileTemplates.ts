@@ -5,7 +5,6 @@ import { AppError } from "../models/AppError";
 import getRootPath from "../utils/getRootPath";
 
 export default () => {
-    
     let rootPath = getRootPath();
     let templatesPath = rootPath.concat('/templates');
     let configTemplatePath = path.join(__dirname, '../', '../', '/templates');

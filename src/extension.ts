@@ -1,9 +1,9 @@
 import * as fs from 'fs';
 import * as yaml from 'js-yaml';
+import * as path from 'path';
 import * as vscode from 'vscode';
 import createFileFromTemplate from './handlers/createFileFromTemplate';
 import setupFileTemplates from './handlers/setupFileTemplates';
-import getRootPath from './utils/getRootPath';
 
 export interface IConfiFile {
 	kinds: string[];
@@ -16,12 +16,10 @@ export interface ITemplate {
 }
 
 export function activate(context: vscode.ExtensionContext) {
-
-	let rootPath = getRootPath();
-
+	let rootPath = path.join(__dirname, '../', '/templates');
 	let disposable = [
 		vscode.commands.registerCommand('filestemplate.createFileTemplates', async args => {
-			createFileFromTemplate(rootPath.concat('/templates'), args.fsPath, loadYaml(rootPath));
+			createFileFromTemplate(rootPath, args.fsPath, loadYaml(rootPath));
 		}),
 		
 		vscode.commands.registerCommand('filestemplate.setupFileTemplates', async args => {
@@ -35,6 +33,6 @@ export function activate(context: vscode.ExtensionContext) {
 export function deactivate() { }
 
 const loadYaml = (rootPath: string): IConfiFile => {
-	let raw = fs.readFileSync(rootPath.concat('/templates', '/config-templates.yaml')).toString();
+	let raw = fs.readFileSync(rootPath.concat('/config-templates.yaml')).toString();
 	return yaml.load(raw) as IConfiFile;
 };
