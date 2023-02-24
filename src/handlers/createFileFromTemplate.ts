@@ -1,6 +1,7 @@
-import * as vscode from "vscode";
 import { IConfiFile, ITemplate } from "../extension";
+import { Localized } from "../localizableStrings/localized";
 import { AppManager } from "../utils/AppManager";
+import { showInput, showQuickPick } from "../utils/vscodeActions";
 import createScene from "./createScene/createScene";
 
 export default async (config: IConfiFile) => {
@@ -9,28 +10,26 @@ export default async (config: IConfiFile) => {
     const selectedOptionQuickPick = await getSelectedQuickPickOption();
     const selectedOption = config.templates[selectedOptionQuickPick] as unknown as ITemplate;
     await getSceneNameInput();
-    
-    createScene({selectedOption});
 
-    async function getSceneNameInput(): Promise<string> {
-        let sceneName = await vscode.window.showInputBox({
-            title: "Nome da cena",
-            placeHolder: "Escreva o nome da sua cena",
-        });
-    
+    createScene({ selectedOption });
+
+    async function getSceneNameInput() {
+        let sceneName = await showInput(Localized.sceneNameInput.title, Localized.sceneNameInput.placeholder);
+
         if (!sceneName) {
-            return '';
+            return;
         }
+
         appManager.setSceneName(sceneName);
-        return sceneName;
     }
 
     async function getSelectedQuickPickOption(): Promise<string> {
-        let selectedOptionQuickPick = await vscode.window.showQuickPick(templateOptions, {
-            title: "Templates",
-            placeHolder: "Selecione o template desejado."
-        });
-    
+        let selectedOptionQuickPick = await showQuickPick(
+            templateOptions,
+            Localized.quickTemplates.title,
+            Localized.quickTemplates.placeholder
+        );
+
         if (!selectedOptionQuickPick) {
             return '';
         }

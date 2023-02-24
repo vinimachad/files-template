@@ -2,7 +2,6 @@ import * as fs from 'fs';
 import * as yaml from 'js-yaml';
 import * as vscode from 'vscode';
 import createFileFromTemplate from './handlers/createFileFromTemplate';
-import setupFileTemplates from './handlers/setupFileTemplates';
 import { AppManager } from './utils/AppManager';
 
 export interface IConfiFile {
@@ -19,10 +18,6 @@ export function activate(context: vscode.ExtensionContext) {
 			AppManager.shared.setPathToCreateTemplate(args.fsPath);
 			createFileFromTemplate(loadYaml());
 		}),
-		
-		vscode.commands.registerCommand('filestemplate.setupFileTemplates', async args => {
-			setupFileTemplates();
-		})
 	];
 
 	context.subscriptions.push(...disposable);

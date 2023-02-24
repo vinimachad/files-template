@@ -2,5 +2,3 @@ templates:
   TemplateExample: 
     vars: 
       - 'exampleVar'
-    
-  TemplateExample2: 
